@@ -238,8 +238,8 @@
   /* ---------- interactive demos are loaded only when someone opens one ---------- */
   let demosP;
   const scriptP = {};
-  const loadScript = (g, src) => window[g] ? Promise.resolve() : (scriptP[g] = scriptP[g] || new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = R(src); sc.onload = ok; sc.onerror = () => { delete scriptP[g]; ko(); }; document.head.appendChild(sc); }));
-  const loadDemos = () => window.Demos ? Promise.resolve() : (demosP = demosP || new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = R("assets/demos.js"); sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); }));
+  const loadScript = (g, src) => window[g] ? Promise.resolve() : (scriptP[g] = scriptP[g] || new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = R(src) + (window.ASSET_V ? "?v=" + window.ASSET_V : ""); sc.onload = ok; sc.onerror = () => { delete scriptP[g]; ko(); }; document.head.appendChild(sc); }));
+  const loadDemos = () => window.Demos ? Promise.resolve() : (demosP = demosP || new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = R("assets/demos.js") + (window.ASSET_V ? "?v=" + window.ASSET_V : ""); sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); }));
 
   /* ---------- team credits ---------- */
   const person = (x) => `<span>${x.me ? U("teamMe") : esc(x.name)}${x.years ? ` <i>${esc(x.years)}</i>` : ""}${x.note ? ` <i>${esc(t(x.note))}</i>` : ""}</span>`;
