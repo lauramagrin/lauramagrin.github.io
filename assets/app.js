@@ -19,10 +19,16 @@
 
   const ph = (label = U("imgSoon"), cls = "") => `<div class="ph ${cls}"><span class="label">${esc(label)}</span></div>`;
   window.__ph = (el) => { el.outerHTML = ph(); };
-  const img = (src, alt, eager) => `<img src="${esc(R(src))}" alt="${esc(alt)}" ${eager ? "" : 'loading="lazy"'} decoding="async" onerror="window.__ph(this)">`;
-  const vid = (v, label) => `<video src="${esc(R(v.src))}" poster="${esc(R(v.poster))}" muted loop playsinline preload="metadata" ${REDUCED ? "" : "autoplay"} aria-label="${esc(label)}"></video>`;
+  /* every JPG under assets/img, assets/doc and assets/video has WebP copies at 800 and 1600 px in assets/w/ */
+  const webp = (src, w) => "assets/w/" + src.replace(/^assets\//, "").replace(/\.jpg$/i, "").replace(/\//g, "__") + "-" + w + ".webp";
+  const posterOf = (v) => (hasWebp(v.poster) ? webp(v.poster, 1600) : v.poster);
+  const hasWebp = (src) => !PREVIEW && /^assets\/(img|doc|video)\/.+\.jpg$/i.test(src);
+  const img = (src, alt, eager) => hasWebp(src)
+    ? `<img src="${esc(R(webp(src, 1600)))}" srcset="${esc(R(webp(src, 800)))} 800w, ${esc(R(webp(src, 1600)))} 1600w" sizes="(max-width: 760px) 100vw, 60vw" alt="${esc(alt)}" ${eager ? "" : 'loading="lazy"'} decoding="async" onerror="this.onerror=null;this.removeAttribute('srcset');this.src='${esc(R(src))}'">`
+    : `<img src="${esc(R(src))}" alt="${esc(alt)}" ${eager ? "" : 'loading="lazy"'} decoding="async" onerror="window.__ph(this)">`;
+  const vid = (v, label) => `<video src="${esc(R(v.src))}" poster="${esc(R(posterOf(v)))}" muted loop playsinline preload="metadata" ${REDUCED ? "" : "autoplay"} aria-label="${esc(label)}"></video>`;
   /* Case-page player: autoplays muted, native controls, plus a clear "sound on" button */
-  const player = (v, label) => `<div class="player${v.wide ? " wide" : ""}"><video src="${esc(R(v.src))}" poster="${esc(R(v.poster))}" muted loop playsinline controls preload="metadata" ${REDUCED ? "" : "autoplay"} aria-label="${esc(label)}"></video>
+  const player = (v, label) => `<div class="player${v.wide ? " wide" : ""}"><video src="${esc(R(v.src))}" poster="${esc(R(posterOf(v)))}" muted loop playsinline controls preload="metadata" ${REDUCED ? "" : "autoplay"} aria-label="${esc(label)}"></video>
       ${v.silent ? "" : `<button class="sound" type="button" data-sound>${speaker}<span>${U("soundOn")}</span></button>`}</div>`;
   const media = (m, alt, eager) => (!m ? ph() : typeof m === "string" ? img(m, alt, eager) : vid(m, alt));
   const ytThumb = (id) => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
@@ -36,15 +42,19 @@
       <img src="${ytThumb(v.yt)}" alt="" loading="lazy" onerror="this.remove()"><span class="play">${playIco}</span><span class="t">${esc(t(v.title))}</span></button>`;
   const typo = (p) => `<div class="ph type"><small>${esc(t(C.categories[p.cat]))}</small><span>${esc(t(p.kicker))}</span></div>`;
   const cover = (p) => p.cover || (p.images && p.images[0]) || (p.loops && p.loops[0]) || null;
+  const homeHref = (l = lang) => (PREVIEW ? "#" : l === "pt" ? "/pt/" : "/");
+  const caseHref = (slug, l = lang) => (PREVIEW ? `#work-${slug}` : l === "pt" ? `/pt/projetos/${slug}` : `/work/${slug}`);
+  const pathSlug = () => { const m = location.pathname.match(/^\/(?:pt\/projetos|work)\/([^/.]+)(?:\.html)?\/?$/); return m && P(decodeURIComponent(m[1])) ? decodeURIComponent(m[1]) : null; };
+  const CASE_PAGE = !PREVIEW && !!pathSlug();
 
   /* ---------- header ---------- */
   function header() {
     const label = lang === "en" ? "<b>EN</b><i>/ PT</i>" : "<b>PT</b><i>/ EN</i>";
     const sw = PREVIEW
       ? `<button class="lang" id="lang-toggle" type="button" aria-label="Português / English">${label}</button>`
-      : `<a class="lang" href="${lang === "en" ? "pt/" : "../"}" hreflang="${lang === "en" ? "pt" : "en"}">${label}</a>`;
+      : `<a class="lang" href="${CASE_PAGE ? caseHref(pathSlug(), lang === "en" ? "pt" : "en") : homeHref(lang === "en" ? "pt" : "en")}" hreflang="${lang === "en" ? "pt" : "en"}">${label}</a>`;
     return `<header class="top"><div class="wrap">
-      <a class="lockup" href="#" data-go="top" aria-label="Laura Magrin">${LOGO}<span>Laura Magrin</span></a>
+      <a class="lockup" href="${homeHref()}" data-go="top" aria-label="Laura Magrin">${LOGO}<span>Laura Magrin</span></a>
       <nav class="nav" aria-label="Main">
         <button class="sec" data-go="work">${U("navWork")}</button>
         <button class="sec" data-go="events">${U("navEvents")}</button>
@@ -55,8 +65,8 @@
 
   /* ---------- home ---------- */
   function hero() {
-    const reel = C.reel.slice(0, 3).map((r) => `<figure><a href="#work-${r.slug}">${vid(r.video, t(r.label))}<figcaption>${esc(t(r.label))}</figcaption></a></figure>`).join("");
-    const bg = C.heroVideo ? `<div class="hero-bg" aria-hidden="true"><video src="${esc(R(C.heroVideo.src))}" poster="${esc(R(C.heroVideo.poster))}" muted loop playsinline preload="auto" ${REDUCED ? "" : "autoplay"}></video></div>` : "";
+    const reel = C.reel.slice(0, 3).map((r) => `<figure><a href="${caseHref(r.slug)}">${vid(r.video, t(r.label))}<figcaption>${esc(t(r.label))}</figcaption></a></figure>`).join("");
+    const bg = C.heroVideo ? `<div class="hero-bg" aria-hidden="true"><video src="${esc(R(C.heroVideo.src))}" poster="${esc(R(posterOf(C.heroVideo)))}" muted loop playsinline preload="auto" ${REDUCED ? "" : "autoplay"}></video></div>` : "";
     return `<section class="band hero" id="top">${bg}<div class="wrap">
       <div>
         <p class="label">${U("eyebrow")}</p>
@@ -97,17 +107,17 @@
   const workList = () => WORK.map(P).filter((p) => filter === "all" || p.cat === filter);
   const stillOf = (c) => (!c ? "" : typeof c === "string" ? c : c.poster);
   function tilesHTML() {
-    return workList().map((p, i) => {
+    return workList().map((p, i) => tileHTML(p, i % 5 === 0, i < 2)).join("");
+  }
+  function tileHTML(p, wide, eager) {
       const c = cover(p);
       const isVid = c && typeof c !== "string";
-      const wide = i % 5 === 0;
-      return `<a class="tile${wide ? " wide" : ""}" href="#work-${p.slug}">
-        <div class="frame${p.coverFit === "contain" ? " contain" : ""}"${p.coverFit === "contain" && typeof c === "string" ? ` style="--cbg:url('${esc(R(c))}')"` : p.coverPos ? ` style="--pos:${esc(p.coverPos)}"` : ""}>${c ? media(c, t(p.title), i < 2) : typo(p)}${isVid ? `<span class="badge">Video</span>` : ""}
+      return `<a class="tile${wide ? " wide" : ""}" href="${caseHref(p.slug)}">
+        <div class="frame${p.coverFit === "contain" ? " contain" : ""}"${p.coverFit === "contain" && typeof c === "string" ? ` style="--cbg:url('${esc(R(c))}')"` : p.coverPos ? ` style="--pos:${esc(p.coverPos)}"` : ""}>${c ? media(c, t(p.title), eager) : typo(p)}${isVid ? `<span class="badge">Video</span>` : ""}
           <div class="tile-cap"><div class="meta label"><span>${esc(t(C.categories[p.cat]))}</span><span>${yr(p)}</span></div><h3>${esc(t(p.title))}</h3>${wide ? `<p>${esc(t(p.summary))}</p>` : ""}</div></div></a>`;
-    }).join("");
   }
   function indexHTML() {
-    return workList().map((p, i) => { const c = stillOf(cover(p)); return `<a class="row" href="#work-${p.slug}"${c ? ` data-peek="${esc(R(c))}"` : ""}>
+    return workList().map((p, i) => { const c = stillOf(cover(p)); return `<a class="row" href="${caseHref(p.slug)}"${c ? ` data-peek="${esc(R(c))}"` : ""}>
       <span class="n label">${String(i + 1).padStart(2, "0")}</span>
       <span class="th">${c ? `<img src="${esc(R(c))}" alt="" loading="lazy" decoding="async">` : ""}</span>
       <h3>${esc(t(p.title))}</h3><p>${esc(t(p.summary))}</p>
@@ -131,7 +141,7 @@
   function screening() {
     const f = C.featuredVideo;
     const inner = PREVIEW
-      ? `<img src="${esc(R(f.poster))}" alt="">`
+      ? `<img src="${esc(R(f.poster))}" alt="${esc(U("reelFeatured"))}">`
       : `<iframe src="${ytEmbed(f.yt, `autoplay=1&mute=1&loop=1&playlist=${f.yt}&controls=0`)}" title="${esc(U("reelFeatured"))}" allow="autoplay; encrypted-media; picture-in-picture" tabindex="-1"></iframe>`;
     return `<section class="band" id="reel" aria-labelledby="r-h"><div class="wrap">
       <div class="head"><h2 id="r-h">${U("reelTitle")}</h2><p>${U("reelIntro")}</p></div>
@@ -144,7 +154,7 @@
     return `<section class="band light" id="events" aria-labelledby="e-h"><div class="wrap">
       <div class="head"><h2 id="e-h">${U("eventsTitle")}</h2><p>${U("eventsIntro")}</p></div>
       <div class="years">${C.events.map((y) => `<div class="year"><strong>${y.year}</strong><ul>${y.items.map((e) =>
-        `<li><a href="#work-${e.slug}"><b>${esc(t(e.name))}</b><span>${esc(t(e.note))}</span><i aria-hidden="true">→</i></a></li>`).join("")}</ul></div>`).join("")}</div>
+        `<li><a href="${caseHref(e.slug)}"><b>${esc(t(e.name))}</b><span>${esc(t(e.note))}</span><i aria-hidden="true">→</i></a></li>`).join("")}</ul></div>`).join("")}</div>
       </div></section>`;
   }
 
@@ -281,7 +291,7 @@
       : "";
     /* related project calls */
     const related = p.related
-      ? `<section class="band related-band"><div class="wrap"><div class="head"><h2>${esc(t(p.related.title))}</h2><p>${esc(t(p.related.note || ""))}</p></div><div class="grid related">${p.related.slugs.map(P).map((q, i) => card(q, i, false, false)).join("")}</div></div></section>`
+      ? `<section class="band related-band"><div class="wrap"><div class="head"><h2>${esc(t(p.related.title))}</h2><p>${esc(t(p.related.note || ""))}</p></div><div class="tiles related">${p.related.slugs.map(P).filter(Boolean).map((q) => tileHTML(q, false, false)).join("")}</div></div></section>`
       : "";
     const stats = p.stats && p.stats.length
       ? `<section class="band light stats-band"><div class="wrap"><h2 class="label" style="margin:0 0 18px;color:var(--accent)">${U("atAGlance")}</h2><div class="stats">${p.stats.map((x) => `<div><strong>${esc(x.value)}</strong><span>${esc(t(x.label))}</span></div>`).join("")}</div></div></section>`
@@ -309,7 +319,7 @@
         </div></div></section>
       ${stats}${compare}${videos}${gallery}${p.demosLast ? "" : demos}${related}${docs}${setsOut}${p.demosLast ? demos : ""}${quotes}
       <section class="band wine cta"><div class="wrap"><h2>${p.cta ? esc(t(p.cta.title)) : U("caseCta")}</h2><button class="btn solid" data-go="contact">${p.cta ? esc(t(p.cta.btn)) : U("caseCtaBtn")}</button></div></section>
-      <section class="band"><div class="wrap" style="padding-block:40px 64px"><a class="next" href="#work-${nxt.slug}"><span><span class="label soft">${U("next")}</span><strong>${esc(t(nxt.title))}</strong></span>${arrow}</a></div></section>`;
+      <section class="band"><div class="wrap" style="padding-block:40px 64px"><a class="next" href="${caseHref(nxt.slug)}"><span><span class="label soft">${U("next")}</span><strong>${esc(t(nxt.title))}</strong></span>${arrow}</a></div></section>`;
   }
 
   /* ---------- video autoplay only while visible ---------- */
@@ -404,6 +414,12 @@
   const root = document.getElementById("app");
   function render() {
     document.documentElement.lang = lang;
+    if (CASE_PAGE) {
+      root.innerHTML = header() + `<main class="case" id="case"></main>` + footer() + modalHTML() + lightboxHTML() + `<div class="grain" aria-hidden="true"></div>`;
+      const p = P(pathSlug()), cs = document.getElementById("case");
+      cs.innerHTML = caseView(p); initCarousels(); watchVideos();
+      return;
+    }
     root.innerHTML = header() +
       `<main class="home" id="home">${hero()}${marquee()}${screening()}${numbers()}${work()}${events()}${strengths()}${voices()}${about()}${contact()}</main>` +
       `<main class="case" id="case" hidden></main>` + footer() + modalHTML() + lightboxHTML() + `<div class="grain" aria-hidden="true"></div>`;
@@ -412,6 +428,8 @@
 
   function route(scroll = true) {
     const h = decodeURIComponent(location.hash.slice(1));
+    /* old shared links (#work-slug) now live at their own address */
+    if (!PREVIEW && h.startsWith("work-") && P(h.slice(5))) { location.replace(caseHref(h.slice(5))); return; }
     const home = document.getElementById("home"), cs = document.getElementById("case");
     const p = h.startsWith("work-") && P(h.slice(5));
     if (p) {
@@ -423,12 +441,18 @@
     } else {
       carTimers.forEach(clearInterval); carTimers = [];
       cs.innerHTML = ""; cs.hidden = true; home.hidden = false;
-      document.title = "Laura Magrin";
+      if (PREVIEW) document.title = "Laura Magrin";
+      if (!PREVIEW && h && !scroll) {
+        const go = () => document.getElementById(h)?.scrollIntoView({ block: "start" });
+        requestAnimationFrame(go); setTimeout(go, 350); setTimeout(go, 1200);
+        if (document.readyState !== "complete") window.addEventListener("load", go, { once: true });
+      }
     }
     watchVideos();
   }
 
   function goSection(id) {
+    if (CASE_PAGE) { location.href = homeHref() + (id === "top" ? "" : "#" + id); return; }
     if (!document.getElementById("home").hidden) { document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
     history.pushState(null, "", location.pathname + location.search);
     route(false);
@@ -510,7 +534,7 @@
     location.href = `mailto:${C.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${msg}\n\n— ${name}${from ? " · " + from : ""}`)}`;
   });
 
-  window.addEventListener("hashchange", () => { closeModal(); lbClose(); route(true); });
+  window.addEventListener("hashchange", () => { closeModal(); lbClose(); if (!CASE_PAGE && (PREVIEW || location.hash.startsWith("#work-"))) route(true); });
   document.addEventListener("keydown", (e) => {
     const lbOpenNow = !document.getElementById("lb").hidden;
     if (e.key === "Escape") { closeModal(); lbClose(); }
