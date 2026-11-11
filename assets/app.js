@@ -85,37 +85,47 @@
       </div></section>`;
   }
 
-  const card = (p, i, big, small) => {
+  /* ---------- work: one list, newest first; grid (default) or index ---------- */
+  const span = (p) => { const m = String(p.year).match(/\d{4}/g) || ["0"]; return { s: +m[0], e: +m[m.length - 1] }; };
+  const WORK = (() => {
+    const base = [...C.featured, ...C.more];
+    return base.map(P).filter(Boolean).sort((a, b) => span(b).e - span(a).e || base.indexOf(a.slug) - base.indexOf(b.slug)).map((p) => p.slug);
+  })();
+  let view = "grid";
+  try { view = localStorage.getItem("work-view") === "list" ? "list" : "grid"; } catch (_) {}
+  const yr = (p) => esc(String(p.year).replace(/\s*—\s*/, "–"));
+  const workList = () => WORK.map(P).filter((p) => filter === "all" || p.cat === filter);
+  const stillOf = (c) => (!c ? "" : typeof c === "string" ? c : c.poster);
+  function tilesHTML() {
+    return workList().map((p, i) => {
       const c = cover(p);
       const isVid = c && typeof c !== "string";
-      return `<a class="card${big ? " big" : ""}${small ? " small" : ""}" href="#work-${p.slug}">
-        <div class="frame${p.coverFit === "contain" ? " contain" : ""}"${p.coverFit === "contain" && typeof c === "string" ? ` style="--cbg:url('${esc(R(c))}')"` : p.coverPos ? ` style="--pos:${esc(p.coverPos)}"` : ""}>${c ? media(c, t(p.title), i < 2) : typo(p)}${isVid ? `<span class="badge">Video</span>` : ""}</div>
-        <div class="meta label"><span>${esc(t(C.categories[p.cat]))}</span><span>${esc(p.year)}</span></div>
-        <h3>${esc(t(p.title))}</h3>${small ? "" : `<p>${esc(t(p.summary))}</p>`}</a>`;
-  };
-  function moreHTML() {
-    const list = C.more.map(P).filter((p) => filter === "all" || p.cat === filter);
-    return list.length ? `<h3 class="more-h label">${U("moreWork")}</h3><div class="grid more">${list.map((p, i) => card(p, 9, false, true)).join("")}</div>` : "";
-  }
-  function cardsHTML() {
-    const list = C.featured.map(P).filter((p) => filter === "all" || p.cat === filter);
-    return list.map((p, i) => {
-      const big = filter === "all" && i < 2;
-      const c = cover(p);
-      const isVid = c && typeof c !== "string";
-      return `<a class="card${big ? " big" : ""}" href="#work-${p.slug}">
-        <div class="frame${p.coverFit === "contain" ? " contain" : ""}"${p.coverFit === "contain" && typeof c === "string" ? ` style="--cbg:url('${esc(R(c))}')"` : p.coverPos ? ` style="--pos:${esc(p.coverPos)}"` : ""}>${c ? media(c, t(p.title), i < 2) : typo(p)}${isVid ? `<span class="badge">Video</span>` : ""}</div>
-        <div class="meta label"><span>${esc(t(C.categories[p.cat]))}</span><span>${esc(p.year)}</span></div>
-        <h3>${esc(t(p.title))}</h3><p>${esc(t(p.summary))}</p></a>`;
+      const wide = i % 5 === 0;
+      return `<a class="tile${wide ? " wide" : ""}" href="#work-${p.slug}">
+        <div class="frame${p.coverFit === "contain" ? " contain" : ""}"${p.coverFit === "contain" && typeof c === "string" ? ` style="--cbg:url('${esc(R(c))}')"` : p.coverPos ? ` style="--pos:${esc(p.coverPos)}"` : ""}>${c ? media(c, t(p.title), i < 2) : typo(p)}${isVid ? `<span class="badge">Video</span>` : ""}
+          <div class="tile-cap"><div class="meta label"><span>${esc(t(C.categories[p.cat]))}</span><span>${yr(p)}</span></div><h3>${esc(t(p.title))}</h3>${wide ? `<p>${esc(t(p.summary))}</p>` : ""}</div></div></a>`;
     }).join("");
   }
+  function indexHTML() {
+    return workList().map((p, i) => { const c = stillOf(cover(p)); return `<a class="row" href="#work-${p.slug}"${c ? ` data-peek="${esc(R(c))}"` : ""}>
+      <span class="n label">${String(i + 1).padStart(2, "0")}</span>
+      <span class="th">${c ? `<img src="${esc(R(c))}" alt="" loading="lazy" decoding="async">` : ""}</span>
+      <h3>${esc(t(p.title))}</h3><p>${esc(t(p.summary))}</p>
+      <span class="c label">${esc(t(C.categories[p.cat]))}</span><span class="y label">${yr(p)}</span>
+      <span class="ar" aria-hidden="true">↗</span></a>`; }).join("");
+  }
+  const workBody = () => workList().length ? (view === "grid" ? `<div class="tiles">${tilesHTML()}</div>` : `<div class="index">${indexHTML()}</div>`) : "";
+  const viewToggle = () => `<div class="viewtog" role="group" aria-label="${U("viewLabel")}">
+      <button type="button" data-view="grid" aria-pressed="${view === "grid"}"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>${U("viewGrid")}</button>
+      <button type="button" data-view="list" aria-pressed="${view === "list"}"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="2" width="14" height="2"/><rect x="1" y="7" width="14" height="2"/><rect x="1" y="12" width="14" height="2"/></svg>${U("viewList")}</button></div>`;
 
   function work() {
     const cats = [["all", U("all")], ...Object.entries(C.categories).map(([k, v]) => [k, t(v)])];
     return `<section class="band" id="work" aria-labelledby="w-h"><div class="wrap">
       <div class="head"><h2 id="w-h">${U("workTitle")}</h2><p>${U("workIntro")}</p></div>
-      <div class="filters" role="group" aria-label="Filter">${cats.map(([k, v]) => `<button class="chip" data-filter="${k}" aria-pressed="${filter === k}">${esc(v)}</button>`).join("")}</div>
-      <div class="grid" id="grid">${cardsHTML()}</div><div id="more">${moreHTML()}</div></div></section>`;
+      <div class="work-tools"><div class="filters" role="group" aria-label="Filter">${cats.map(([k, v]) => `<button class="chip" data-filter="${k}" aria-pressed="${filter === k}">${esc(v)}</button>`).join("")}</div>${viewToggle()}</div>
+      <div id="grid">${workBody()}</div></div></section>
+      <div class="peek" id="peek" aria-hidden="true"><img alt=""></div>`;
   }
 
   function screening() {
@@ -241,7 +251,7 @@
 
   /* ---------- case view ---------- */
   function caseView(p) {
-    const order = [...C.featured, ...C.more];
+    const order = WORK;
     const nxt = P(order[(order.indexOf(p.slug) + 1) % order.length]);
     const facts = [[U("year"), esc(p.year)], [U("client"), esc(t(p.client))], [U("myRole"), esc(t(p.role))], [U("place"), esc(t(p.place))]].filter((f) => f[1]);
     if (p.link) facts.push([U("visit"), `<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</a>`]);
@@ -265,9 +275,9 @@
     const setsOut = sets.replace(/@@DOC(\d+)@@/g, (_, k) => docBand(p.docs[+k], +k));
     /* interactive demos (fictional data), opened in a pop-up */
     const demos = p.demos
-      ? `<section class="band light demo-band"><div class="wrap"><div class="head"><h2>${U("demosTitle")}</h2><p>${U("demosIntro")}</p></div>
-          <div class="demo-cards">${p.demos.map((d) => `<button type="button" class="demo-card" data-demo="${esc(d.id)}" data-dtitle="${esc(t(d.title))}">${d.img ? `<span class="dc-img">${img(d.img, "")}</span>` : ""}<span class="dc-txt"><span class="label">${esc(t(d.kind))}</span><strong>${esc(t(d.title))}</strong><span class="dc-note">${esc(t(d.note))}</span><span class="go">${U("demoOpen")} →</span></span></button>`).join("")}</div>
-          <p class="demo-disclaimer">${U("demosNote")}</p></div></section>`
+      ? `<section class="band light demo-band"><div class="wrap"><div class="head"><h2>${p.demosText ? esc(t(p.demosText.title)) : U("demosTitle")}</h2><p>${p.demosText ? esc(t(p.demosText.intro)) : U("demosIntro")}</p></div>
+          <div class="demo-cards">${p.demos.map((d) => `<button type="button" class="demo-card" data-demo="${esc(d.id)}" data-dtitle="${esc(t(d.title))}"${d.flag || (p.demosText && p.demosText.flag) ? ` data-dflag="${esc(t(d.flag || p.demosText.flag))}"` : ""}>${d.img ? `<span class="dc-img">${img(d.img, "")}</span>` : ""}<span class="dc-txt"><span class="label">${esc(t(d.kind))}</span><strong>${esc(t(d.title))}</strong><span class="dc-note">${esc(t(d.note))}</span><span class="go">${U("demoOpen")} →</span></span></button>`).join("")}</div>
+          <p class="demo-disclaimer">${p.demosText ? esc(t(p.demosText.note)) : U("demosNote")}</p></div></section>`
       : "";
     /* related project calls */
     const related = p.related
@@ -297,7 +307,7 @@
             <h2 class="label" style="margin:26px 0 0;color:var(--soft)">${U("deliverables")}</h2>
             <div class="tags">${t(p.deliverables).map((d) => `<span>${esc(d)}</span>`).join("")}</div>${teamHTML(p)}${p.feature ? `<figure class="feature-fig"><button class="zoom" type="button" data-lb aria-label="${esc(t(p.feature.caption))}">${img(p.feature.src, t(p.feature.caption))}</button><figcaption>${esc(t(p.feature.caption))}</figcaption></figure>` : ""}</div>
         </div></div></section>
-      ${stats}${compare}${videos}${gallery}${demos}${related}${docs}${setsOut}${quotes}
+      ${stats}${compare}${videos}${gallery}${p.demosLast ? "" : demos}${related}${docs}${setsOut}${p.demosLast ? demos : ""}${quotes}
       <section class="band wine cta"><div class="wrap"><h2>${p.cta ? esc(t(p.cta.title)) : U("caseCta")}</h2><button class="btn solid" data-go="contact">${p.cta ? esc(t(p.cta.btn)) : U("caseCtaBtn")}</button></div></section>
       <section class="band"><div class="wrap" style="padding-block:40px 64px"><a class="next" href="#work-${nxt.slug}"><span><span class="label soft">${U("next")}</span><strong>${esc(t(nxt.title))}</strong></span>${arrow}</a></div></section>`;
   }
@@ -315,6 +325,18 @@
     }), { rootMargin: "80px" });
     document.querySelectorAll("video, iframe[data-autoyt]").forEach((v) => io.observe(v));
     document.querySelectorAll("iframe[data-autoyt]").forEach((f) => f.addEventListener("load", () => { if (f.getBoundingClientRect().top < innerHeight) ytCmd(f, "playVideo"); }, { once: true }));
+  }
+
+  /* index view: floating cover preview that follows the pointer */
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    document.addEventListener("mousemove", (e) => {
+      const pk = document.getElementById("peek"); if (!pk) return;
+      const row = e.target.closest && e.target.closest(".index .row");
+      if (row && row.dataset.peek && innerWidth > 900) {
+        const im = pk.firstElementChild; if (im.getAttribute("src") !== row.dataset.peek) im.src = row.dataset.peek;
+        pk.style.left = Math.min(e.clientX + 210, innerWidth - 200) + "px"; pk.style.top = e.clientY + "px"; pk.classList.add("on");
+      } else pk.classList.remove("on");
+    }, { passive: true });
   }
 
   let lastFocus = null;
@@ -420,7 +442,13 @@
     if (f) {
       filter = f.dataset.filter;
       document.querySelectorAll("[data-filter]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.filter === filter));
-      document.getElementById("grid").innerHTML = cardsHTML(); document.getElementById("more").innerHTML = moreHTML(); watchVideos(); return;
+      document.getElementById("grid").innerHTML = workBody(); watchVideos(); return;
+    }
+    const vw = e.target.closest("[data-view]");
+    if (vw) {
+      view = vw.dataset.view; try { localStorage.setItem("work-view", view); } catch (_) {}
+      document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === view));
+      document.getElementById("grid").innerHTML = workBody(); watchVideos(); return;
     }
     if (e.target.closest("[data-close]")) { closeModal(); return; }
     if (e.target.closest("[data-lbclose]")) { lbClose(); return; }
@@ -439,7 +467,7 @@
       return;
     }
     const dm = e.target.closest("[data-demo]");
-    if (dm) { loadDemos().then(() => window.Demos.open(dm.dataset.demo, lang, dm.dataset.dtitle)); return; }
+    if (dm) { loadDemos().then(() => window.Demos.open(dm.dataset.demo, lang, dm.dataset.dtitle, dm.dataset.dflag)); return; }
     const dr = e.target.closest("[data-docread]");
     if (dr) { const z = dr.closest("[data-lbscope]").querySelector(".zoom"); if (z) lbOpen(z); return; }
     const st = e.target.closest("[data-lbstep]");

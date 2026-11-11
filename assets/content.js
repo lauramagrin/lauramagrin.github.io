@@ -30,7 +30,7 @@ window.CONTENT = {
       pt: "Construo marcas, campanhas e eventos B2B para a transição energética, do primeiro esboço de uma identidade ao painel de LED no dia do evento."
     },
     based: { en: "Based in Brazil (GMT−3) · working remotely worldwide · EN / PT", pt: "No Brasil (GMT−3) · trabalho remoto para qualquer país · EN / PT" },
-    ctaWork: { en: "See selected work", pt: "Ver projetos" },
+    ctaWork: { en: "See my work", pt: "Ver projetos" },
     ctaCv: { en: "Download résumé", pt: "Baixar currículo" },
     ctaContact: { en: "Start a project", pt: "Começar um projeto" },
     moreWork: { en: "More work", pt: "Mais projetos" },
@@ -52,10 +52,13 @@ window.CONTENT = {
     compareIntro: { en: "The event before I joined, and the identity I created in 2022.", pt: "O evento antes da minha entrada, e a identidade que criei em 2022." },
     meCaption: { en: "At Greener Summit 2026, São Paulo", pt: "No Greener Summit 2026, em São Paulo" },
     numbersTitle: { en: "Since 2021, at Greener", pt: "Desde 2021, na Greener" },
-    workTitle: { en: "Selected work", pt: "Projetos selecionados" },
+    workTitle: { en: "Work", pt: "Projetos" },
+    viewLabel: { en: "View", pt: "Visualização" },
+    viewGrid: { en: "Grid", pt: "Grade" },
+    viewList: { en: "List", pt: "Lista" },
     workIntro: {
-      en: "Corporate events, brand systems, editorial design, growth, data and a few illustrated projects of my own.",
-      pt: "Eventos corporativos, sistemas de marca, design editorial, growth, dados e alguns projetos ilustrados autorais."
+      en: "Corporate events, brand systems, editorial design, growth, data and illustrated projects of my own, newest first.",
+      pt: "Eventos corporativos, sistemas de marca, design editorial, growth, dados e projetos ilustrados autorais, do mais recente ao mais antigo."
     },
     all: { en: "All", pt: "Todos" },
     reelTitle: { en: "On screen", pt: "Em tela" },
@@ -254,7 +257,7 @@ window.CONTENT = {
     brand: { en: "Brand & Growth", pt: "Marca e Growth" },
     editorial: { en: "Editorial & Web", pt: "Editorial e Web" },
     illustration: { en: "Illustration", pt: "Ilustração" },
-    motion: { en: "Design & Motion", pt: "Design e Motion" }
+    motion: { en: "Motion", pt: "Motion" }
   },
 
   projects: [
@@ -590,35 +593,41 @@ window.CONTENT = {
         mgmt: [{ me: true }],
         design: [{ name: "Renan Corazza" }, { me: true }, { name: "Viviane Custódio" }],
         ui: [{ name: "Caio Mikael", note: { en: "implementation, 2025", pt: "implementação, 2025" } }],
-        front: [{ name: "Lucas Azevedo" }, { me: true, note: { en: "via vibe coding", pt: "via vibe coding" } }],
+        front: [{ name: "Lucas Azevedo" }, { me: true, note: { en: "via vibe coding with Claude Code", pt: "via vibe coding com o Claude Code" } }],
         back: [{ name: "Samuel Nicolai" }],
-        copy: [{ name: "Larissa Maria" }, { name: "Mateus Pinheiro", years: "2025" }]
+        copy: [{ name: "Larissa Maria", note: { en: "copy and page structure", pt: "copy e estruturação de páginas" } }, { name: "Mateus Pinheiro", years: "2025" }]
       },
       cat: "editorial",
       title: { en: "greener.com.br", pt: "greener.com.br" },
       kicker: { en: "One site for an ecosystem of products", pt: "Um site para um ecossistema de produtos" },
-      year: "2025 — 2026",
+      year: "2025 — 2027",
       client: "Greener",
       role: { en: "Head of Marketing & Design", pt: "Head de Marketing e Design" },
       place: "Web",
       link: "https://greener.com.br",
       summary: {
-        en: "The company website as a single home for studies, events, courses and articles, with a landing page for every launch, several of them built with AI-assisted coding.",
-        pt: "O site institucional como casa única para estudos, eventos, cursos e artigos, com uma landing page para cada lançamento, várias delas construídas com código assistido por IA."
+        en: "The company website as a single home for studies, events, courses and articles. Today I also publish to it: new pages, fixes and landing pages for each launch, built with AI-assisted coding.",
+        pt: "O site institucional como casa única para estudos, eventos, cursos e artigos. Hoje também publico nele: páginas novas, correções e landing pages para cada lançamento, construídas com código assistido por IA."
       },
       body: {
         en: [
-          "Greener works across three pillars: Market Intelligence, Events and Education. The new website, launched in July 2025, brings them together, from the latest study and open courses to the next immersion, the Summit and the Greener Insights library.",
-          "I manage the website project and its visual direction, design layouts with the team and contribute to the front end through vibe coding (I don't hand-write code: I build with AI in Claude Code, alongside Greener's developers), along with the landing pages that support each product and campaign. Recent pages and prototypes, such as event landing pages and a sponsor web app with QR codes and attendee profiling planned for Greener Summit 2027, were built with vibe coding in Claude Code, which shortened the path from layout to a live page."
+          "Greener works across three pillars: Market Intelligence, Events and Education. The website, launched in July 2025, brings them together, from the latest study and open courses to the next immersion, the Summit and the Greener Insights library.",
+          "I manage the website project and its visual direction, design layouts with the team and contribute to the front end through vibe coding: I don't hand-write code, I build with AI in Claude Code, alongside Greener's developers. Larissa Maria works with me on copy and on structuring each page.",
+          "Since late October 2026 I also publish to the site myself. I set up the rules for the repository (every change goes through a branch, a pull request and an automatic preview before it reaches the live site) and since then I have shipped new pages, fixes and content in Portuguese and English:",
+          "New pages: the landing page for the Strategic Energy Storage Study 2027, a new Education page that brings together the online course and the in-person immersions (in Portuguese and English), the English version of the Greener Immersion page, and the article “Energy storage advances in regulation” in both languages.",
+          "Fixes and updates: the RD Station forms swapped across the study pages with a fix to the Send button, the home page's featured studies now read automatically from the library page, the sponsor section updated, the menu reorganised, and permanent redirects so old immersion and education links lead to the current pages."
         ],
         pt: [
-          "A Greener atua em três pilares: Inteligência de Mercado, Eventos e Educação. O novo site, lançado em julho de 2025, reúne todos eles, do estudo mais recente e cursos abertos à próxima imersão, ao Summit e à biblioteca Greener Insights.",
-          "Faço a gestão do projeto do site e de sua direção visual, desenho layouts com o time e contribuo com o front-end via vibe coding (não programo à mão: construo com IA no Claude Code, ao lado dos desenvolvedores da Greener), além das landing pages que sustentam cada produto e campanha. Páginas e protótipos recentes, como landing pages de eventos e um web app para patrocinadores com QR code e perfilamento de participantes, previsto para o Greener Summit 2027, foram construídos com vibe coding no Claude Code, encurtando o caminho entre o layout e a página no ar."
+          "A Greener atua em três pilares: Inteligência de Mercado, Eventos e Educação. O site, lançado em julho de 2025, reúne todos eles, do estudo mais recente e cursos abertos à próxima imersão, ao Summit e à biblioteca Greener Insights.",
+          "Faço a gestão do projeto do site e de sua direção visual, desenho layouts com o time e contribuo com o front-end via vibe coding: não programo à mão, construo com IA no Claude Code, ao lado dos desenvolvedores da Greener. A Larissa Maria trabalha comigo no copy e na estruturação de cada página.",
+          "Desde o fim de outubro de 2026 também publico no site. Defini as regras do repositório (toda alteração passa por branch, pull request e um preview automático antes de chegar ao site no ar) e, desde então, coloquei no ar páginas novas, correções e conteúdo em português e inglês:",
+          "Páginas novas: a landing page do Estudo Estratégico de Armazenamento de Energia 2027, a nova página Educação, que reúne o curso on-line e as imersões presenciais (em português e inglês), a versão em inglês da página da Imersão Greener e o artigo “Armazenamento avança na regulação” nos dois idiomas.",
+          "Correções e atualizações: troca dos formulários do RD Station nas páginas de estudos, com correção do botão Enviar; os estudos em destaque da home passaram a ser lidos automaticamente da página da biblioteca; atualização dos patrocinadores; reorganização do menu; e redirecionamentos permanentes para que links antigos das imersões e da página de educação levem às páginas atuais."
         ]
       },
       deliverables: {
-        en: ["Project management", "Visual direction", "Layouts", "Front-end via vibe coding", "Landing pages", "Vibe coding", "Web app prototype (2027)", "Forms & RD Station integration"],
-        pt: ["Gestão do projeto", "Direção visual", "Layouts", "Front-end via vibe coding", "Landing pages", "Vibe coding", "Protótipo de web app (2027)", "Formulários e integração com RD Station"]
+        en: ["Project management", "Visual direction", "Layouts", "Front-end via vibe coding", "Publishing (branches, PRs, previews)", "New pages and landing pages", "Page fixes and redirects", "Bilingual content (PT/EN)", "Forms & RD Station integration", "Web app prototype (2027)"],
+        pt: ["Gestão do projeto", "Direção visual", "Layouts", "Front-end via vibe coding", "Publicação (branches, PRs, previews)", "Páginas novas e landing pages", "Correções de páginas e redirecionamentos", "Conteúdo bilíngue (PT/EN)", "Formulários e integração com RD Station", "Protótipo de web app (2027)"]
       },
       cover: IMG("covers/website.jpg"),
       stats: [
@@ -626,7 +635,34 @@ window.CONTENT = {
         { value: "62K+", label: { en: "unique visitors since launch", pt: "visitantes únicos desde o lançamento" } },
         { value: "2.3×", label: { en: "monthly visitors, Sep 2026 vs Sep 2025", pt: "visitantes no mês, set/2026 vs set/2025" } }
       ],
-      images: [IMG("web/01.jpg"), IMG("web/02.jpg"), IMG("web/03.jpg"), IMG("web/tall-02.jpg"), IMG("web/04.jpg"), IMG("web/05.jpg"), IMG("web/06.jpg"), IMG("web/07.jpg")]
+      sets: [
+        { title: { en: "Pages I published · Oct–Nov 2026", pt: "Páginas que publiquei · out–nov 2026" },
+          note: { en: "Study landing page, Education page, the Greener Immersion in English and a bilingual article, on desktop and mobile.", pt: "Landing page do estudo, página Educação, a Imersão Greener em inglês e um artigo bilíngue, no computador e no celular." },
+          images: [IMG("web/m-lp.jpg"), IMG("web/m-home.jpg"), IMG("web/m-lp2.jpg"), IMG("web/m-edu.jpg"), IMG("web/m-imersao.jpg"), IMG("web/m-artigo.jpg"), IMG("web/m-lp-tall.jpg")] },
+        { title: { en: "Earlier pages · 2025–2026", pt: "Páginas anteriores · 2025–2026" },
+          images: [IMG("web/01.jpg"), IMG("web/02.jpg"), IMG("web/03.jpg"), IMG("web/tall-02.jpg"), IMG("web/04.jpg"), IMG("web/05.jpg"), IMG("web/06.jpg"), IMG("web/07.jpg")] }
+      ],
+      images: [],
+      demosLast: true,
+      demosText: {
+        title: { en: "The code in action", pt: "O código em ação" },
+        intro: { en: "Simplified, clickable versions of pages and components I published on the site. Open one to try it.", pt: "Versões resumidas e clicáveis de páginas e componentes que publiquei no site. Abra uma para testar." },
+        note: { en: "Content in these demos is fictional and simplified, inspired by the real pages on greener.com.br; forms don't send anything. The redirect map uses the site's real routes.", pt: "O conteúdo destas demos é fictício e simplificado, inspirado nas páginas reais do greener.com.br; os formulários não enviam nada. O mapa de redirecionamentos usa as rotas reais do site." },
+        flag: { en: "Fictional content · simplified demo of a real page", pt: "Conteúdo fictício · versão demonstrativa de uma página real" }
+      },
+      demos: [
+        { id: "lp", img: IMG("web/d-lp.jpg"), kind: { en: "Landing page", pt: "Landing page" }, title: { en: "Study landing page", pt: "Landing page de estudo" },
+          note: { en: "Language switch, highlights by segment, sample vs full edition and the lead form that opens from each button.", pt: "Troca de idioma, destaques por segmento, amostra x completo e o formulário de lead que abre em cada botão." } },
+        { id: "home", img: IMG("web/d-home.jpg"), kind: { en: "Component", pt: "Componente" }, title: { en: "Featured studies on the home page", pt: "Estudos em destaque na home" },
+          note: { en: "Change the featured block on the library page and watch the home page follow, including the fallback when it can't be read.", pt: "Mude o bloco de destaque na biblioteca e veja a home acompanhar, inclusive o plano B quando a leitura falha." } },
+        { id: "edu", img: IMG("web/d-edu.jpg"), kind: { en: "Page", pt: "Página" }, title: { en: "Education page", pt: "Página Educação" },
+          note: { en: "Two formats on one page: modules released in sequence and an immersion with a countdown, day tabs and an application form.", pt: "Dois formatos em uma página: módulos liberados em sequência e uma imersão com contagem regressiva, abas por dia e formulário de aplicação." } },
+        { id: "form", img: IMG("web/d-form.jpg"), kind: { en: "Component", pt: "Componente" }, title: { en: "Lead form", pt: "Formulário de lead" },
+          note: { en: "One form in two languages, inline validation and a Send button that can't fire twice. Try a network error.", pt: "Um formulário em dois idiomas, validação nos campos e um botão Enviar que não dispara duas vezes. Teste um erro de rede." } },
+        { id: "redirects", img: IMG("web/d-redirects.jpg"), kind: { en: "Fix", pt: "Correção" }, title: { en: "Redirect map", pt: "Mapa de redirecionamentos" },
+          note: { en: "Type an old address and see where the site sends it. Real routes from the site's configuration.", pt: "Digite um endereço antigo e veja para onde o site leva. Rotas reais da configuração do site." },
+          flag: { en: "Real routes · simulation", pt: "Rotas reais · simulação" } }
+      ]
     },
     {
       slug: "greener-studies",
@@ -665,7 +701,7 @@ window.CONTENT = {
       cat: "brand",
       title: { en: "Marketing operations & data", pt: "Gestão e dados de marketing" },
       kicker: { en: "Calendars, reports and a lead base that makes sense", pt: "Calendários, relatórios e uma base de leads que faz sentido" },
-      year: "2023 — 2026",
+      year: "2023 — 2027",
       client: "Greener",
       role: { en: "Head of Marketing & Design", pt: "Head de Marketing e Design" },
       place: { en: "In-house", pt: "Interno" },

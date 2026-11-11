@@ -1,4 +1,4 @@
-/* Interactive demos for the "Marketing operations & data" case.
+/* Interactive demos for the "Marketing operations & data" and "greener.com.br" cases.
    Lightweight, fictional-data versions of internal tools (editorial calendar + channel dashboards).
    Loaded on demand; exposes window.Demos.open(id, lang). No libraries: charts are hand-drawn SVG/HTML. */
 (function () {
@@ -337,8 +337,250 @@
     sortable(root, S, render); render();
   }
 
+  /* =====================================================================
+     Web demos for the greener.com.br case: fictional, simplified versions
+     of pages and components published on the site, rebuilt to run here.
+     Scoped under .gx (green site look) so nothing leaks into the portfolio.
+     ===================================================================== */
+  const ico = {
+    cart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+  };
+  const gnav = (pageLang, extra = "") => `<div class="gx-nav"><span class="gx-logo">◆ ${L("Example Energy", "Energia Exemplo")}</span><nav><span>${pageLang === "pt" ? "Inteligência" : "Intelligence"}</span><span>${pageLang === "pt" ? "Educação" : "Education"}</span><span>${pageLang === "pt" ? "Eventos" : "Events"}</span></nav>${extra}</div>`;
+  const okMail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  /* ---------- 1 · study landing page ---------- */
+  function lp(root) {
+    let pl = lang, seg = "ci", open = null, state = "idle", who = "";
+    const T = (en, pt) => (pl === "pt" ? pt : en);
+    const SEG = {
+      ci: { en: "C&I", pt: "C&I", stats: [["480 MWh", T("new C&I volume in the year (example)", "novos volumes em C&I no ano (exemplo)")], ["37%", T("share of the year's new volume", "do volume novo do ano")], ["2.4×", T("growth vs previous year", "crescimento sobre o ano anterior")], ["5", T("business models compared", "modelos de negócio comparados")]] },
+      res: { en: "Residential", pt: "Residencial", stats: [["210 MWh", T("new residential volume (example)", "novos volumes residenciais (exemplo)")], ["16%", T("share of the year's new volume", "do volume novo do ano")], ["1.8×", T("growth vs previous year", "crescimento sobre o ano anterior")], ["3", T("customer profiles mapped", "perfis de cliente mapeados")]] },
+      util: { en: "Utility", pt: "Utility", stats: [["620 MWh", T("contracted utility-scale volume (example)", "volume contratado em utility (exemplo)")], ["47%", T("share of the year's new volume", "do volume novo do ano")], ["2031", T("horizon of the projections", "horizonte das projeções")], ["4", T("auction scenarios", "cenários de leilão")]] }
+    };
+    function form() {
+      if (state === "done") return `<div class="gx-done" role="status">${ico.check}<strong>${T("Sample on its way", "Amostra a caminho")}</strong><p>${T("In the real page, the sample link goes to", "Na página real, o link da amostra vai para")} <b>${esc(who)}</b> ${T("and the lead lands in RD Station with the page as its source. Nothing was sent here.", "e o lead entra no RD Station com a página como origem. Nada foi enviado aqui.")}</p><button type="button" class="gx-btn ghost" data-lpreset>${T("Try again", "Testar de novo")}</button></div>`;
+      return `<form class="gx-form" novalidate data-lpform>
+        <h4>${open === "buy" ? T("Get the full study", "Adquira o estudo completo") : T("Download the free sample", "Baixe a versão amostra")}</h4>
+        <label>${T("Name", "Nome")}<input name="n" autocomplete="off" required></label>
+        <label>${T("Work email", "E-mail corporativo")}<input name="e" type="email" autocomplete="off" required></label>
+        <label>${T("Company", "Empresa")}<input name="c" autocomplete="off"></label>
+        <label>${T("Your segment", "Seu segmento")}<select name="s"><option value="">${T("Choose", "Escolha")}…</option><option>${T("Manufacturer", "Fabricante")}</option><option>${T("Distributor", "Distribuidor")}</option><option>${T("Investor", "Investidor")}</option><option>${T("Solutions provider", "Provedor de soluções")}</option></select></label>
+        <p class="gx-err" role="alert"></p>
+        <button class="gx-btn" type="submit" ${state === "sending" ? "disabled" : ""}>${state === "sending" ? `<span class="gx-spin"></span>${T("Sending…", "Enviando…")}` : open === "buy" ? ico.cart + T("Go to checkout", "Ir para o pagamento") : ico.down + T("Send me the sample", "Quero a amostra")}</button>
+      </form>`;
+    }
+    function draw() {
+      const s = SEG[seg];
+      root.innerHTML = `<div class="gx">
+        ${gnav(pl, `<button type="button" class="gx-lang" data-lplang>${ico.globe}${pl.toUpperCase()}</button>`)}
+        <header class="gx-hero">
+          <div class="gx-cover"><small>${T("STRATEGIC STUDY 2027", "ESTUDO ESTRATÉGICO 2027")}</small><strong>${T("ENERGY STORAGE", "ARMAZENAMENTO DE ENERGIA")}</strong><span>${T("Example edition", "Edição exemplo")}</span></div>
+          <div class="gx-hero-t"><span class="gx-crumb">${T("Library › Studies", "Biblioteca › Estudos")}</span><h3>${T("Strategic Study on Energy Storage 2027", "Estudo Estratégico de Armazenamento de Energia 2027")}</h3><p>${T("Market data, projections to 2031, cost structure, regulation and business models in one edition.", "Dados de mercado, projeções até 2031, estrutura de custos, regulação e modelos de negócio em uma edição.")}</p></div>
+          <div class="gx-buy"><span class="gx-pill">${T("Paid material", "Material pago")}</span><button type="button" class="gx-btn" data-lpopen="buy">${ico.cart}${T("Get the study", "Adquira o estudo")}</button><button type="button" class="gx-btn ghost" data-lpopen="sample">${ico.down}${T("Free sample", "Baixar amostra")}</button></div>
+        </header>
+        <div class="gx-cols">
+          <div class="gx-main">
+            <h4 class="gx-h">${T("Study highlights", "Destaques do estudo")}</h4>
+            <div class="gx-tabs" role="tablist">${Object.entries(SEG).map(([k, v]) => `<button type="button" role="tab" aria-selected="${k === seg}" data-lpseg="${k}">${esc(v[pl])}</button>`).join("")}</div>
+            <div class="gx-stats">${s.stats.map(([v, l]) => `<div><strong>${esc(v)}</strong><span>${esc(l)}</span></div>`).join("")}</div>
+            <p class="gx-note">${T("Numbers in this demo are illustrative.", "Os números desta demo são ilustrativos.")}</p>
+            <h4 class="gx-h">${T("Free sample or full study?", "Amostra gratuita ou estudo completo?")}</h4>
+            <div class="gx-compare">
+              <div><span class="gx-tag">${T("Sample · free", "Amostra · gratuita")}</span><ul><li class="y">${ico.check}${T("Market overview", "Visão geral do mercado")}</li><li class="y">${ico.check}${T("Preview of the main themes", "Prévia dos principais temas")}</li><li>${ico.x}${T("Full projections to 2031", "Projeções completas até 2031")}</li><li>${ico.x}${T("Costs and business models", "Custos e modelos de negócio")}</li></ul><button type="button" class="gx-btn ghost" data-lpopen="sample">${ico.down}${T("Download sample", "Baixar amostra")}</button></div>
+              <div class="dark"><span class="gx-tag lime">${T("Full edition", "Versão completa")}</span><ul><li class="y">${ico.check}${T("National and international panorama", "Panorama nacional e internacional")}</li><li class="y">${ico.check}${T("Capacity and investment to 2031", "Capacidade e investimentos até 2031")}</li><li class="y">${ico.check}${T("CAPEX, regulation, business models", "CAPEX, regulação, modelos de negócio")}</li><li class="y">${ico.check}${T("Reading by application", "Leitura por aplicação")}</li></ul><button type="button" class="gx-btn" data-lpopen="buy">${ico.cart}${T("Get the study", "Adquira o estudo")}</button></div>
+            </div>
+          </div>
+          <aside class="gx-side${open ? " on" : ""}">${open ? form() : `<div class="gx-hint">${T("Click “Free sample” or “Get the study” to open the lead form.", "Clique em “Baixar amostra” ou “Adquira o estudo” para abrir o formulário.")}</div>`}</aside>
+        </div></div>`;
+    }
+    root.addEventListener("click", (e) => {
+      if (e.target.closest("[data-lplang]")) { pl = pl === "pt" ? "en" : "pt"; draw(); return; }
+      const sg = e.target.closest("[data-lpseg]"); if (sg) { seg = sg.dataset.lpseg; draw(); return; }
+      const op = e.target.closest("[data-lpopen]"); if (op) { open = op.dataset.lpopen; state = "idle"; draw(); const f = root.querySelector(".gx-side input"); if (f) f.focus(); return; }
+      if (e.target.closest("[data-lpreset]")) { state = "idle"; open = null; draw(); }
+    });
+    root.addEventListener("submit", (e) => {
+      if (!e.target.matches("[data-lpform]")) return;
+      e.preventDefault();
+      const f = e.target, err = f.querySelector(".gx-err");
+      const n = f.n.value.trim(), m = f.e.value.trim();
+      if (!n) { err.textContent = T("Please enter your name.", "Preencha o seu nome."); f.n.focus(); return; }
+      if (!okMail(m)) { err.textContent = T("Please enter a valid email.", "Digite um e-mail válido."); f.e.focus(); return; }
+      who = m; state = "sending"; draw();
+      setTimeout(() => { state = "done"; draw(); }, 1100);
+    });
+    draw();
+  }
+
+  /* ---------- 2 · home featured studies, read from the library page ---------- */
+  function home(root) {
+    const LIB = () => [
+      { id: "a", t: L("Energy Storage Study 2027", "Estudo de Armazenamento 2027"), tag: L("Storage", "Armazenamento"), c: "#2f5d4f" },
+      { id: "b", t: L("Distributed Solutions Study · H1", "Estudo de Soluções Distribuídas · 1º semestre"), tag: L("Distributed generation", "Geração distribuída"), c: "#476a2e" },
+      { id: "c", t: L("Auction Outlook", "Outlook de Leilões"), tag: L("Regulation", "Regulação"), c: "#2a4a63" },
+      { id: "d", t: L("Quarterly M&A Bulletin", "Boletim Trimestral de M&A"), tag: L("Bulletin", "Boletim"), c: "#5a4a2a" },
+      { id: "e", t: L("BESS Catalogue", "Catálogo BESS"), tag: L("Guide", "Guia"), c: "#3f3d63" }
+    ];
+    let main = "a", side = ["b", "c"], fail = false, flash = 0;
+    const by = (id) => LIB().find((x) => x.id === id);
+    const card = (s, big) => `<div class="gx-hcard${big ? " big" : ""}"><span class="gx-img" style="--c:${s.c}"></span><div><span class="gx-tag">${esc(s.tag)}</span><strong>${esc(s.t)}</strong></div></div>`;
+    function draw() {
+      const shown = fail ? { m: by("d"), s: [by("e"), by("c")] } : { m: by(main), s: side.map(by) };
+      root.innerHTML = `<div class="gx gx-split">
+        <section class="gx-pane"><h4>${L("Library page · featured block", "Página Biblioteca · bloco de destaque")}</h4>
+          <p class="gx-note">${L("Choose the main study and up to two side studies.", "Escolha o estudo principal e até dois laterais.")}</p>
+          <table class="gx-lib"><thead><tr><th>${L("Study", "Estudo")}</th><th>${L("Main", "Principal")}</th><th>${L("Side", "Lateral")}</th></tr></thead><tbody>
+          ${LIB().map((s) => `<tr><td>${esc(s.t)}</td><td><input type="radio" name="gx-main" value="${s.id}" ${s.id === main ? "checked" : ""} aria-label="${esc(L("Main: ", "Principal: ") + s.t)}"></td><td><input type="checkbox" value="${s.id}" data-side ${side.includes(s.id) ? "checked" : ""} ${s.id === main ? "disabled" : ""} aria-label="${esc(L("Side: ", "Lateral: ") + s.t)}"></td></tr>`).join("")}
+          </tbody></table>
+          <label class="gx-switch"><input type="checkbox" data-fail ${fail ? "checked" : ""}> ${L("Simulate: library page can't be read", "Simular: página da biblioteca não pôde ser lida")}</label>
+        </section>
+        <section class="gx-pane dark"><h4>${L("Home page · “Studies” section", "Home · seção “Estudos”")}</h4>
+          <div class="gx-home${flash ? " flash" : ""}">${card(shown.m, true)}<div class="gx-hside">${shown.s.filter(Boolean).map((s) => card(s)).join("")}</div></div>
+          <p class="gx-note">${fail ? L("Fallback: the home keeps the cards written in its own HTML, so the section never goes blank.", "Plano B: a home mantém os cards escritos no próprio HTML, e a seção nunca fica vazia.") : L("The home reads the library's featured block and rebuilds its cards. Change it once, both pages follow.", "A home lê o bloco de destaque da biblioteca e remonta os cards. Muda em um lugar, as duas páginas acompanham.")}</p>
+        </section></div>`;
+      flash = 0;
+    }
+    root.addEventListener("change", (e) => {
+      const t = e.target;
+      if (t.name === "gx-main") { main = t.value; side = side.filter((x) => x !== main); if (side.length < 2) side = side.concat(LIB().map((s) => s.id).filter((x) => x !== main && !side.includes(x))).slice(0, 2); }
+      else if (t.hasAttribute("data-side")) { if (t.checked) { side = side.concat(t.value).slice(-2); } else side = side.filter((x) => x !== t.value); }
+      else if (t.hasAttribute("data-fail")) fail = t.checked;
+      flash = 1; draw();
+    });
+    draw();
+  }
+
+  /* ---------- 3 · education page: online course + in-person immersions ---------- */
+  function edu(root) {
+    let fmt = "course", unlocked = 2, day = 1, applied = false, sending = false;
+    const MODS = () => [L("Technologies and regulatory landscape", "Tecnologias e panorama regulatório"), L("Load profile and sizing", "Perfil de carga e dimensionamento"), L("Business models and feasibility", "Modelos de negócio e viabilidade"), L("Real cases, step by step", "Cases reais, passo a passo"), L("Specification and consultative selling", "Especificação e venda consultiva")];
+    const DAYS = () => ({ 1: [[L("Understanding the case", "Entendendo o case"), L("Diagnosis of the problem", "Diagnóstico do problema")], [L("Sizing and CAPEX", "Dimensionamento e CAPEX"), L("The technical solution gets a cost", "A solução técnica ganha custo")]], 2: [[L("Financial analysis", "Análise financeira"), L("The model, built in class", "O modelo, construído em sala")], [L("Business model and pitch", "Modelo de negócio e pitch"), L("Wrap-up before a panel", "Fechamento diante de uma banca")]] });
+    const next = new Date(Date.now() + 13 * 86400e3);
+    function left() { const ms = Math.max(0, next - Date.now()); const d = Math.floor(ms / 86400e3), h = Math.floor(ms / 3600e3) % 24, m = Math.floor(ms / 60e3) % 60; return [[d, L("days", "dias")], [h, L("hours", "horas")], [m, L("min", "min")]]; }
+    function draw() {
+      root.innerHTML = `<div class="gx">${gnav(lang)}
+        <header class="gx-hero edu"><div class="gx-hero-t"><h3>${L("Example Education", "Educação Exemplo")}</h3><p>${L("Hands-on training on the energy market, in two formats.", "Formações práticas sobre o mercado de energia, em dois formatos.")}</p></div></header>
+        <div class="gx-formats" role="tablist">
+          <button type="button" role="tab" aria-selected="${fmt === "course"}" data-fmt="course"><strong>${L("Online course", "Curso on-line")}</strong><span>${L("Recorded, at your own pace", "Gravado, no seu ritmo")}</span></button>
+          <button type="button" role="tab" aria-selected="${fmt === "imm"}" data-fmt="imm"><strong>${L("In-person immersions", "Imersões presenciais")}</strong><span>${L("Small cohorts, two days", "Turmas reduzidas, dois dias")}</span></button>
+        </div>
+        ${fmt === "course" ? `<section class="gx-sec"><h4 class="gx-h">${L("Five modules, released in sequence", "Cinco módulos, liberados em sequência")}</h4>
+          <ol class="gx-mods">${MODS().map((m, i) => `<li class="${i < unlocked ? "open" : "locked"}"><span class="n">${i + 1}</span><span>${esc(m)}</span>${i < unlocked ? `<em>${i < unlocked - 1 ? L("Done", "Concluído") : L("Available", "Liberado")}</em>` : `<em>${ico.lock}</em>`}</li>`).join("")}</ol>
+          <div class="gx-row"><button type="button" class="gx-btn" data-advance ${unlocked >= 5 ? "disabled" : ""}>${unlocked >= 5 ? L("All modules released", "Todos os módulos liberados") : L("Finish current module", "Concluir módulo atual")}</button><button type="button" class="gx-btn ghost" data-reset>${L("Restart", "Recomeçar")}</button></div></section>`
+        : `<section class="gx-sec dark"><div class="gx-imm-top"><div><span class="gx-tag lime">${L("Next cohort · applications open", "Próxima turma · inscrições abertas")}</span><h4 class="gx-h">${L("BESS Financial Modelling · example cohort", "Modelagem Financeira BESS · turma exemplo")}</h4></div>
+            <div class="gx-count" aria-label="${L("Time until the cohort", "Tempo até a turma")}">${left().map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join("")}</div></div>
+          <div class="gx-tabs" role="tablist"><button type="button" role="tab" aria-selected="${day === 1}" data-day="1">${L("Day 1", "Dia 1")}</button><button type="button" role="tab" aria-selected="${day === 2}" data-day="2">${L("Day 2", "Dia 2")}</button></div>
+          <div class="gx-steps">${DAYS()[day].map(([t, d], i) => `<div><span class="n">0${(day - 1) * 2 + i + 1}</span><strong>${esc(t)}</strong><span>${esc(d)}</span></div>`).join("")}</div>
+          ${applied ? `<div class="gx-done" role="status">${ico.check}<strong>${L("Application received", "Aplicação recebida")}</strong><p>${L("Seats are filled by application. Simulation only: nothing was sent.", "As vagas são preenchidas por aplicação. Apenas simulação: nada foi enviado.")}</p></div>`
+            : `<form class="gx-form inline" novalidate data-apply><label>${L("Name", "Nome")}<input name="n" autocomplete="off"></label><label>${L("Email", "E-mail")}<input name="e" type="email" autocomplete="off"></label><label class="w">${L("Your challenge today", "Seu desafio hoje")}<input name="d" autocomplete="off"></label><p class="gx-err" role="alert"></p><button class="gx-btn" type="submit" ${sending ? "disabled" : ""}>${sending ? `<span class="gx-spin"></span>${L("Sending…", "Enviando…")}` : L("Apply for my seat", "Quero minha vaga")}</button></form>`}
+        </section>`}
+      </div>`;
+    }
+    const tick = setInterval(() => { if (!root.isConnected) { clearInterval(tick); return; } const c = root.querySelector(".gx-count"); if (c) c.innerHTML = left().map(([v, l]) => `<div><strong>${v}</strong><span>${l}</span></div>`).join(""); }, 30000);
+    root.addEventListener("click", (e) => {
+      const f = e.target.closest("[data-fmt]"); if (f) { fmt = f.dataset.fmt; draw(); return; }
+      const d = e.target.closest("[data-day]"); if (d) { day = +d.dataset.day; draw(); return; }
+      if (e.target.closest("[data-advance]")) { unlocked = Math.min(5, unlocked + 1); draw(); return; }
+      if (e.target.closest("[data-reset]")) { unlocked = 1; draw(); }
+    });
+    root.addEventListener("submit", (e) => {
+      if (!e.target.matches("[data-apply]")) return; e.preventDefault();
+      const fm = e.target, err = fm.querySelector(".gx-err");
+      if (!fm.n.value.trim()) { err.textContent = L("Please enter your name.", "Preencha o seu nome."); fm.n.focus(); return; }
+      if (!okMail(fm.e.value.trim())) { err.textContent = L("Please enter a valid email.", "Digite um e-mail válido."); fm.e.focus(); return; }
+      sending = true; draw(); setTimeout(() => { sending = false; applied = true; draw(); }, 1000);
+    });
+    draw();
+  }
+
+  /* ---------- 4 · standard lead form: one component, two languages, safe submit ---------- */
+  function form(root) {
+    let fl = lang, phase = "idle", ignored = 0, netFail = false, log = [];
+    const T = (en, pt) => (fl === "pt" ? pt : en);
+    const stamp = () => new Date().toLocaleTimeString(loc(), { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const add = (m, k = "") => { log.unshift({ t: stamp(), m, k }); log = log.slice(0, 9); };
+    function draw(keep) {
+      const vals = keep || {};
+      root.innerHTML = `<div class="gx gx-split">
+        <section class="gx-pane"><div class="gx-row sb"><h4>${T("Lead form", "Formulário de lead")}</h4><button type="button" class="gx-lang light" data-flang>${ico.globe}${fl.toUpperCase()}</button></div>
+          ${phase === "done" ? `<div class="gx-done" role="status">${ico.check}<strong>${T("Thank you!", "Obrigado!")}</strong><p>${T("We'll be in touch soon.", "Em breve entraremos em contato.")}</p><button type="button" class="gx-btn ghost" data-freset>${T("Fill again", "Preencher de novo")}</button></div>` :
+          `<form class="gx-form" novalidate data-lead>
+            <label>${T("Name", "Nome")}<input name="n" value="${esc(vals.n || "")}" autocomplete="off"><small class="gx-fe" data-for="n"></small></label>
+            <label>${T("Work email", "E-mail corporativo")}<input name="e" type="email" value="${esc(vals.e || "")}" autocomplete="off"><small class="gx-fe" data-for="e"></small></label>
+            <label>${T("Phone (optional)", "Telefone (opcional)")}<input name="p" inputmode="tel" value="${esc(vals.p || "")}" autocomplete="off"></label>
+            <label class="gx-check"><input type="checkbox" name="ok" ${vals.ok ? "checked" : ""}> ${T("I agree to receive content by email.", "Aceito receber conteúdos por e-mail.")}</label><small class="gx-fe" data-for="ok"></small>
+            <p class="gx-err" role="alert">${phase === "error" ? T("Connection failed. Your answers are kept: try again.", "Falha de conexão. Suas respostas foram mantidas: tente de novo.") : ""}</p>
+            <button class="gx-btn" type="submit" ${phase === "sending" ? 'aria-disabled="true"' : ""}>${phase === "sending" ? `<span class="gx-spin"></span>${T("Sending…", "Enviando…")}` : T("Send", "Enviar")}</button>
+          </form>`}
+          <label class="gx-switch"><input type="checkbox" data-net ${netFail ? "checked" : ""}> ${T("Simulate a network error", "Simular erro de rede")}</label>
+        </section>
+        <section class="gx-pane dark"><h4>${T("What the component does", "O que o componente faz")}</h4>
+          <div class="gx-kv"><span>${T("Clicks ignored while sending", "Cliques ignorados durante o envio")}</span><strong>${ignored}</strong></div>
+          <ol class="gx-log">${log.length ? log.map((x) => `<li class="${x.k}"><time>${x.t}</time>${esc(x.m)}</li>`).join("") : `<li class="muted">${T("Fill in the form and press Send (try clicking it several times).", "Preencha e clique em Enviar (experimente clicar várias vezes).")}</li>`}</ol>
+        </section></div>`;
+    }
+    const values = () => { const f = root.querySelector("[data-lead]"); return f ? { n: f.n.value, e: f.e.value, p: f.p.value, ok: f.ok.checked } : {}; };
+    function validate(f) {
+      const errs = { n: !f.n.value.trim() ? T("Required field.", "Campo obrigatório.") : "", e: !okMail(f.e.value.trim()) ? T("Enter a valid email.", "Digite um e-mail válido.") : "", ok: !f.ok.checked ? T("Consent is needed to send.", "O aceite é necessário para enviar.") : "" };
+      root.querySelectorAll(".gx-fe").forEach((s) => { s.textContent = errs[s.dataset.for] || ""; });
+      return !errs.n && !errs.e && !errs.ok;
+    }
+    root.addEventListener("submit", (e) => {
+      if (!e.target.matches("[data-lead]")) return; e.preventDefault();
+      if (phase === "sending") { ignored++; add(T("Extra click ignored: button locked while sending", "Clique extra ignorado: botão travado durante o envio"), "warn"); const v = values(); draw(v); return; }
+      const f = e.target;
+      if (!validate(f)) { add(T("Validation stopped the send", "A validação impediu o envio"), "warn"); const v = values(); draw(v); validate(root.querySelector("[data-lead]")); return; }
+      const v = values(); phase = "sending"; add(T("Valid · sending to the marketing platform (simulated)", "Válido · enviando para a plataforma de marketing (simulado)")); draw(v);
+      setTimeout(() => {
+        if (!root.isConnected) return;
+        if (netFail) { phase = "error"; add(T("Network error · answers kept, button released", "Erro de rede · respostas mantidas, botão liberado"), "bad"); draw(v); return; }
+        phase = "done"; add(T("Conversion recorded with page and language as source (simulated)", "Conversão registrada com página e idioma como origem (simulado)"), "good"); draw();
+      }, 1400);
+    });
+    root.addEventListener("click", (e) => {
+      if (e.target.closest("[data-flang]")) { const v = values(); fl = fl === "pt" ? "en" : "pt"; add(fl === "pt" ? "Idioma: português" : "Language: English"); draw(v); return; }
+      if (e.target.closest("[data-freset]")) { phase = "idle"; draw(); }
+    });
+    root.addEventListener("change", (e) => { if (e.target.hasAttribute("data-net")) { netFail = e.target.checked; } });
+    draw();
+  }
+
+  /* ---------- 5 · redirect map (real routes from the site config) ---------- */
+  function redirects(root) {
+    const R = [
+      ["/lpbess", "/imersao-greener"], ["/lpbess.html", "/imersao-greener"], ["/imersao-bess-cni", "/imersao-greener"], ["/imersao-bess-cni.html", "/imersao-greener"],
+      ["/lrcap", "/imersao-greener"], ["/lrcap.html", "/imersao-greener"], ["/en/lpbess", "/en/imersao-greener"], ["/en/lpbess.html", "/en/imersao-greener"],
+      ["/en/lrcap", "/en/imersao-greener"], ["/en/lrcap.html", "/en/imersao-greener"], ["/lp-educacao-greener", "/educacao"], ["/lp-educacao-greener.html", "/educacao"]
+    ];
+    let q = "/lpbess", hit = null;
+    const find = (path) => { const p = path.trim().replace(/^https?:\/\/(www\.)?greener\.com\.br/i, "").replace(/\/$/, "") || "/"; return R.find(([a]) => a.toLowerCase() === p.toLowerCase()) || null; };
+    function draw(anim) {
+      hit = find(q);
+      root.innerHTML = `<div class="gx gx-split">
+        <section class="gx-pane"><h4>${L("Type or pick an old address", "Digite ou escolha um endereço antigo")}</h4>
+          <form class="gx-url" data-rq><span>greener.com.br</span><input name="q" value="${esc(q)}" aria-label="${L("Path", "Caminho")}" autocomplete="off" spellcheck="false"><button class="gx-btn" type="submit">${L("Open", "Abrir")}</button></form>
+          <div class="gx-chips">${R.filter((r, i) => i % 2 === 0).map(([a]) => `<button type="button" data-rpick="${esc(a)}" aria-pressed="${hit && hit[0].replace(".html", "") === a}">${esc(a)}</button>`).join("")}</div>
+          <p class="gx-note">${L("Routes copied from the site's configuration: old landing pages of past immersions and the education page now point to the current pages, so old links in emails and ads keep working.", "Rotas copiadas da configuração do site: landing pages antigas das imersões e a página de educação apontam para as páginas atuais, e links antigos em e-mails e anúncios continuam funcionando.")}</p>
+        </section>
+        <section class="gx-pane dark"><h4>${L("What the visitor gets", "O que o visitante recebe")}</h4>
+          ${hit ? `<div class="gx-route${anim ? " go" : ""}"><div class="old"><small>${L("Requested", "Pedido")}</small><code>${esc(hit[0])}</code></div><div class="code">301<small>${L("moved permanently", "movido permanentemente")}</small></div><div class="new"><small>${L("Delivered", "Entregue")}</small><code>${esc(hit[1])}</code></div></div>
+            <p class="gx-note">${hit[1].includes("imersao") ? L("All the immersion pages were merged into one page with the next cohort; the English routes go to the English page.", "Todas as páginas de imersão viraram uma só, com a próxima turma; as rotas em inglês vão para a página em inglês.") : L("The old education landing page was replaced by the new Education page.", "A landing page antiga de educação foi substituída pela nova página Educação.")}</p>`
+            : `<div class="gx-route miss"><div class="old"><small>${L("Requested", "Pedido")}</small><code>${esc(q)}</code></div><div class="code">—<small>${L("no redirect rule", "sem regra de redirecionamento")}</small></div></div><p class="gx-note">${L("This path isn't in the redirect list, so the site would serve it as it is (or show its not-found page).", "Esse caminho não está na lista, então o site o entrega como está (ou mostra a página de não encontrado).")}</p>`}
+        </section></div>`;
+    }
+    root.addEventListener("submit", (e) => { if (!e.target.matches("[data-rq]")) return; e.preventDefault(); q = e.target.q.value || "/"; draw(true); });
+    root.addEventListener("click", (e) => { const b = e.target.closest("[data-rpick]"); if (b) { q = b.dataset.rpick; draw(true); } });
+    draw(false);
+  }
+
   /* ---------- modal shell ---------- */
-  const DEMOS = { calendar, instagram, linkedin, youtube, articles };
+  const DEMOS = { calendar, instagram, linkedin, youtube, articles, lp, home, edu, form, redirects };
   let shell, tip, lastFocus;
   function ensureShell() {
     if (shell) return;
@@ -354,11 +596,11 @@
     shell.addEventListener("mouseleave", () => { tip.hidden = true; });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && shell && !shell.hidden) close(); });
   }
-  function open(id, l, title) {
+  function open(id, l, title, flag) {
     lang = l === "pt" ? "pt" : "en";
     ensureShell(); lastFocus = document.activeElement;
     shell.querySelector(".demo-title").textContent = title || id;
-    shell.querySelector(".demo-flag").textContent = L("Fictional data · simplified demo of an internal tool", "Dados fictícios · versão demonstrativa e resumida de uma ferramenta interna");
+    shell.querySelector(".demo-flag").textContent = flag || L("Fictional data · simplified demo of an internal tool", "Dados fictícios · versão demonstrativa e resumida de uma ferramenta interna");
     shell.setAttribute("aria-label", title || id);
     const body = shell.querySelector(".demo-body");
     const fresh = body.cloneNode(false); body.replaceWith(fresh); /* drop old listeners */
