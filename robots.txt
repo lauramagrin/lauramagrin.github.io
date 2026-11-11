@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lauramagrin.github.io/sitemap.xml
