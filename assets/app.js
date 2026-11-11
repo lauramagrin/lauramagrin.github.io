@@ -7,6 +7,8 @@
   const R = (s) => (/^(https?:|data:|blob:|\/|#)/.test(s) ? s : BASE + s);
   const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let lang = document.documentElement.lang === "pt" ? "pt" : "en";
+  /* the 404 page is served at any address: follow the language of the address that was asked for */
+  if (window.PAGE404 && /^\/pt(\/|$)/.test(location.pathname)) lang = "pt";
   let filter = "all";
 
   const t = (v) => (v == null ? "" : typeof v === "string" ? v : v[lang] ?? v.en ?? "");
@@ -45,20 +47,35 @@
   const homeHref = (l = lang) => (PREVIEW ? "#" : l === "pt" ? "/pt/" : "/");
   const caseHref = (slug, l = lang) => (PREVIEW ? `#work-${slug}` : l === "pt" ? `/pt/projetos/${slug}` : `/work/${slug}`);
   const pathSlug = () => { const m = location.pathname.match(/^\/(?:pt\/projetos|work)\/([^/.]+)(?:\.html)?\/?$/); return m && P(decodeURIComponent(m[1])) ? decodeURIComponent(m[1]) : null; };
-  const CASE_PAGE = !PREVIEW && !!pathSlug();
+  /* articles (assets/articles.js, loaded only once they are published) */
+  const ARTS = (window.ARTICLES || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+  const AR = (slug) => ARTS.find((a) => a.slug === slug);
+  const artsHref = (l = lang) => (PREVIEW ? "#articles" : l === "pt" ? "/pt/artigos/" : "/articles/");
+  const artHref = (slug, l = lang) => (PREVIEW ? `#article-${slug}` : l === "pt" ? `/pt/artigos/${slug}` : `/articles/${slug}`);
+  const pathArticle = () => {
+    const m = location.pathname.match(/^\/(?:pt\/artigos|articles)\/?(?:([^/.]+)(?:\.html)?\/?)?$/);
+    if (!m || !ARTS.length) return null;
+    if (!m[1] || m[1] === "index") return { kind: "articles" };
+    const sl = decodeURIComponent(m[1]);
+    return AR(sl) ? { kind: "article", slug: sl } : null;
+  };
+  /* pages other than the home page: a case, the article list, an article, or "not found" */
+  const SUB = PREVIEW ? null : window.PAGE404 ? { kind: "404" } : pathSlug() ? { kind: "case", slug: pathSlug() } : pathArticle();
+  const altHref = (l) => !SUB ? homeHref(l) : SUB.kind === "case" ? caseHref(SUB.slug, l) : SUB.kind === "article" ? artHref(SUB.slug, l) : SUB.kind === "articles" ? artsHref(l) : homeHref(l);
 
   /* ---------- header ---------- */
   function header() {
     const label = lang === "en" ? "<b>EN</b><i>/ PT</i>" : "<b>PT</b><i>/ EN</i>";
     const sw = PREVIEW
       ? `<button class="lang" id="lang-toggle" type="button" aria-label="Português / English">${label}</button>`
-      : `<a class="lang" href="${CASE_PAGE ? caseHref(pathSlug(), lang === "en" ? "pt" : "en") : homeHref(lang === "en" ? "pt" : "en")}" hreflang="${lang === "en" ? "pt" : "en"}">${label}</a>`;
+      : `<a class="lang" href="${altHref(lang === "en" ? "pt" : "en")}" hreflang="${lang === "en" ? "pt" : "en"}">${label}</a>`;
     return `<header class="top"><div class="wrap">
       <a class="lockup" href="${homeHref()}" data-go="top" aria-label="Laura Magrin">${LOGO}<span>Laura Magrin</span></a>
       <nav class="nav" aria-label="Main">
         <button class="sec" data-go="work">${U("navWork")}</button>
         <button class="sec" data-go="events">${U("navEvents")}</button>
-        <button class="sec" data-go="about">${U("navAbout")}</button>
+        <button class="sec" data-go="about">${U("navAbout")}</button>${ARTS.length ? `
+        <a class="sec" href="${artsHref()}">${U("navArticles")}</a>` : ""}
         <button data-go="contact">${U("navContact")}</button>${sw}
       </nav></div></header>`;
   }
@@ -217,7 +234,7 @@
         </form></div></div></div></section>`;
   }
 
-  const footer = () => `<footer class="band"><div class="wrap"><span>© 2026 Laura Magrin</span><span>${U("footer")}</span></div></footer>`;
+  const footer = () => `<footer class="band"><div class="wrap"><span>© 2026 Laura Magrin</span><span>${U("footer")}${window.LMConsent || !PREVIEW ? ` · <button type="button" class="linkish" data-consent>Cookies</button>` : ""}</span></div></footer>`;
 
   /* ---------- auto-advancing photo carousel (long galleries) ---------- */
   const carousel = (imgs, title, cls = "", lead = "") => `<div class="carousel${cls ? " " + cls : ""}" data-carousel${/doc/.test(cls) ? " data-noauto" : ""}>
@@ -322,6 +339,51 @@
       <section class="band"><div class="wrap" style="padding-block:40px 64px"><a class="next" href="${caseHref(nxt.slug)}"><span><span class="label soft">${U("next")}</span><strong>${esc(t(nxt.title))}</strong></span>${arrow}</a></div></section>`;
   }
 
+  /* ---------- articles ---------- */
+  const fmtDate = (d) => new Date(d + "T12:00:00").toLocaleDateString(lang === "pt" ? "pt-BR" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const readMins = (a) => Math.max(1, Math.round(t(a.body).filter((b) => typeof b === "string").join(" ").split(/\s+/).length / 220));
+  const artMeta = (a) => `<time datetime="${a.date}">${fmtDate(a.date)}</time> · ${readMins(a)} ${U("minRead")}`;
+  const artCard = (a, eager, h = "h2") => `<a class="art-card" href="${artHref(a.slug)}"><span class="frame">${img(a.cover, "", eager)}</span>
+      <span class="art-meta label">${artMeta(a)}</span><${h}>${esc(t(a.title))}</${h}><p>${esc(t(a.dek))}</p><span class="go label">${U("articleRead")} →</span></a>`;
+  function articleBody(a) {
+    let out = "", ul = [];
+    const flush = () => { if (ul.length) { out += `<ul>${ul.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`; ul = []; } };
+    for (const b of t(a.body)) {
+      if (typeof b === "string" && b.startsWith("- ")) { ul.push(b.slice(2)); continue; }
+      flush();
+      if (typeof b !== "string") out += `<figure class="art-fig"><button class="zoom" type="button" data-lb aria-label="${esc(b.cap || "")}">${img(b.img, b.cap || "")}</button>${b.cap ? `<figcaption>${esc(b.cap)}</figcaption>` : ""}</figure>`;
+      else if (b.startsWith("## ")) out += `<h2>${esc(b.slice(3))}</h2>`;
+      else out += `<p>${esc(b)}</p>`;
+    }
+    flush();
+    return out;
+  }
+  const articlesBand = () => `<section class="band arts-band" id="latest-articles"><div class="wrap"><div class="head"><h2>${U("articlesTitle")}</h2><p>${U("articlesIntro")}</p></div>
+      <div class="art-list">${ARTS.slice(0, 3).map((a) => artCard(a, false, "h3")).join("")}</div>
+      <p class="arts-all"><a class="btn" href="${artsHref()}">${U("articlesAll")} →</a></p></div></section>`;
+  const articlesView = () => `<section class="band decor case-top arts-top"><div class="wrap">
+        <p class="case-kicker label">Laura Magrin</p><h1>${U("articlesTitle")}</h1><p class="arts-intro">${U("articlesIntro")}</p>
+        <div class="art-list">${ARTS.map((a, i) => artCard(a, i < 2)).join("")}</div></div></section>`;
+  function articleView(a) {
+    const p = P(a.project);
+    const others = ARTS.filter((x) => x !== a).slice(0, 2);
+    return `<article class="band decor case-top art"><div class="wrap">
+        <a class="back label" href="${artsHref()}">← ${U("articlesAll")}</a>
+        <div class="art-head"><p class="case-kicker label">${artMeta(a)}</p><h1>${esc(t(a.title))}</h1><p class="art-dek">${esc(t(a.dek))}</p>
+          <p class="art-by label">Laura Magrin</p></div>
+        <figure class="art-cover">${img(a.cover, t(a.title), true)}</figure>
+        <div class="art-body">${articleBody(a)}</div>
+        ${p ? `<div class="art-body"><a class="next art-case" href="${caseHref(p.slug)}"><span><span class="label soft">${U("articleCase")}</span><strong>${esc(t(p.title))}</strong></span>${arrow}</a></div>` : ""}
+      </div></article>
+      ${others.length ? `<section class="band light"><div class="wrap"><div class="head"><h2>${U("articleMore")}</h2><p></p></div><div class="art-list">${others.map((x) => artCard(x, false, "h3")).join("")}</div></div></section>` : ""}
+      <section class="band wine cta"><div class="wrap"><h2>${U("caseCta")}</h2><button class="btn solid" data-go="contact">${U("caseCtaBtn")}</button></div></section>`;
+  }
+  const notFound = () => `<section class="band decor case-top nf"><div class="wrap">
+        <p class="case-kicker label">${U("nfKicker")}</p><h1>${U("nfTitle")}</h1><p class="arts-intro">${U("nfText")}</p>
+        <p class="nf-actions"><a class="btn solid" href="${homeHref()}">${U("nfHome")}</a>${ARTS.length ? `<a class="btn" href="${artsHref()}">${U("articlesTitle")}</a>` : ""}</p>
+        <h2 class="label nf-label">${U("nfWork")}</h2>
+        <div class="tiles related">${WORK.slice(0, 4).map(P).filter(Boolean).map((q) => tileHTML(q, false, false)).join("")}</div></div></section>`;
+
   /* ---------- video autoplay only while visible ---------- */
   let io;
   const ytCmd = (f, func) => { try { f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch (_) {} };
@@ -414,14 +476,16 @@
   const root = document.getElementById("app");
   function render() {
     document.documentElement.lang = lang;
-    if (CASE_PAGE) {
+    if (SUB) {
       root.innerHTML = header() + `<main class="case" id="case"></main>` + footer() + modalHTML() + lightboxHTML() + `<div class="grain" aria-hidden="true"></div>`;
-      const p = P(pathSlug()), cs = document.getElementById("case");
-      cs.innerHTML = caseView(p); initCarousels(); watchVideos();
+      const cs = document.getElementById("case");
+      cs.innerHTML = SUB.kind === "case" ? caseView(P(SUB.slug)) : SUB.kind === "article" ? articleView(AR(SUB.slug)) : SUB.kind === "articles" ? articlesView() : notFound();
+      if (SUB.kind === "404") document.title = `${U("nfTitle")} · Laura Magrin`;
+      initCarousels(); watchVideos();
       return;
     }
     root.innerHTML = header() +
-      `<main class="home" id="home">${hero()}${marquee()}${screening()}${numbers()}${work()}${events()}${strengths()}${voices()}${about()}${contact()}</main>` +
+      `<main class="home" id="home">${hero()}${marquee()}${screening()}${numbers()}${work()}${events()}${strengths()}${voices()}${about()}${ARTS.length ? articlesBand() : ""}${contact()}</main>` +
       `<main class="case" id="case" hidden></main>` + footer() + modalHTML() + lightboxHTML() + `<div class="grain" aria-hidden="true"></div>`;
     route(false);
   }
@@ -432,10 +496,12 @@
     if (!PREVIEW && h.startsWith("work-") && P(h.slice(5))) { location.replace(caseHref(h.slice(5))); return; }
     const home = document.getElementById("home"), cs = document.getElementById("case");
     const p = h.startsWith("work-") && P(h.slice(5));
-    if (p) {
-      cs.innerHTML = caseView(p); cs.hidden = false; home.hidden = true;
+    const a = PREVIEW && h.startsWith("article-") && AR(h.slice(8));
+    const list = PREVIEW && h === "articles" && ARTS.length;
+    if (p || a || list) {
+      cs.innerHTML = p ? caseView(p) : a ? articleView(a) : articlesView(); cs.hidden = false; home.hidden = true;
       home.querySelectorAll("video").forEach((v) => v.pause());
-      document.title = `${t(p.title)} · Laura Magrin`;
+      document.title = `${p ? t(p.title) : a ? t(a.title) : U("articlesTitle")} · Laura Magrin`;
       if (scroll) window.scrollTo(0, 0);
       initCarousels();
     } else {
@@ -452,7 +518,7 @@
   }
 
   function goSection(id) {
-    if (CASE_PAGE) { location.href = homeHref() + (id === "top" ? "" : "#" + id); return; }
+    if (SUB) { location.href = homeHref() + (id === "top" ? "" : "#" + id); return; }
     if (!document.getElementById("home").hidden) { document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
     history.pushState(null, "", location.pathname + location.search);
     route(false);
@@ -460,6 +526,7 @@
   }
 
   document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-consent]")) { if (window.LMConsent) window.LMConsent(); return; }
     const go = e.target.closest("[data-go]");
     if (go) { e.preventDefault(); goSection(go.dataset.go); return; }
     const f = e.target.closest("[data-filter]");
@@ -534,7 +601,7 @@
     location.href = `mailto:${C.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${msg}\n\n— ${name}${from ? " · " + from : ""}`)}`;
   });
 
-  window.addEventListener("hashchange", () => { closeModal(); lbClose(); if (!CASE_PAGE && (PREVIEW || location.hash.startsWith("#work-"))) route(true); });
+  window.addEventListener("hashchange", () => { closeModal(); lbClose(); if (!SUB && (PREVIEW || location.hash.startsWith("#work-"))) route(true); });
   document.addEventListener("keydown", (e) => {
     const lbOpenNow = !document.getElementById("lb").hidden;
     if (e.key === "Escape") { closeModal(); lbClose(); }

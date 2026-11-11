@@ -23,6 +23,19 @@ window.CONTENT = {
     navEvents: { en: "Events", pt: "Eventos" },
     navAbout: { en: "About", pt: "Sobre" },
     navContact: { en: "Contact", pt: "Contato" },
+    navArticles: { en: "Articles", pt: "Artigos" },
+    articlesTitle: { en: "Articles", pt: "Artigos" },
+    articlesIntro: { en: "Notes from the work: what I learned building events, brands and pages for the energy sector.", pt: "Notas do trabalho: o que aprendi construindo eventos, marcas e páginas para o setor de energia." },
+    articlesAll: { en: "All articles", pt: "Todos os artigos" },
+    articleRead: { en: "Read", pt: "Ler" },
+    minRead: { en: "min read", pt: "min de leitura" },
+    articleCase: { en: "See the full case", pt: "Ver o case completo" },
+    articleMore: { en: "More articles", pt: "Mais artigos" },
+    nfKicker: { en: "Error 404", pt: "Erro 404" },
+    nfTitle: { en: "This page doesn't exist", pt: "Esta página não existe" },
+    nfText: { en: "The link may be old or mistyped. These are good places to start:", pt: "O link pode ser antigo ou ter sido digitado errado. Estes são bons pontos de partida:" },
+    nfHome: { en: "Go to the home page", pt: "Ir para a página inicial" },
+    nfWork: { en: "Recent work", pt: "Projetos recentes" },
     eyebrow: { en: "Freelance · Brand, events & growth", pt: "Freela · Marca, eventos e growth" },
     role: { en: "Head of Marketing & Design", pt: "Head de Marketing e Design" },
     thesis: {
@@ -501,38 +514,50 @@ window.CONTENT = {
     },
     {
       slug: "armazenamento-2025",
-      team: { copy: [{ name: "Mateus Pinheiro" }, { name: "Larissa Maria" }], design: [{ name: "Renan Corazza" }, { name: "Arthur Laprano" }] },
+      team: { copy: [{ name: "Mateus Pinheiro", years: "2025" }, { name: "Larissa Maria" }], design: [{ name: "Renan Corazza", years: "2025" }, { name: "Arthur Laprano", years: "2025" }, { me: true, years: "2026" }] },
       cat: "events",
-      title: { en: "Energy Storage 2025", pt: "Armazenamento de Energia 2025" },
-      kicker: { en: "Launching Greener's storage study", pt: "Lançamento do estudo de armazenamento da Greener" },
-      year: "2025",
+      title: { en: "Energy Storage Study", pt: "Estudo de Armazenamento de Energia" },
+      kicker: { en: "Two editions, from launch event to landing page", pt: "Duas edições, do evento de lançamento à landing page" },
+      year: "2025 — 2026",
       client: "Greener",
       role: { en: "Marketing & Design lead", pt: "Líder de Marketing e Design" },
-      place: "Praça São Lourenço · São Paulo",
+      place: { en: "Praça São Lourenço · São Paulo, and online", pt: "Praça São Lourenço · São Paulo, e on-line" },
       cover: VID("storage-launch"),
       stats: [
-        { value: "1,500", label: { en: "downloads of the study's free sample edition", pt: "downloads da versão amostra do estudo" } }
+        { value: "40", label: { en: "copies of the 2025 edition sold", pt: "exemplares da edição 2025 vendidos" } },
+        { value: "1,500", label: { en: "downloads of the study's free sample edition", pt: "downloads da versão amostra do estudo" } },
+        { value: "2", label: { en: "editions launched, 2025 and 2026", pt: "edições lançadas, em 2025 e 2026" } }
       ],
       summary: {
-        en: "Launch event for Greener's first strategic study on energy storage, bringing together specialists, companies and investors.",
-        pt: "Evento de lançamento do primeiro estudo estratégico da Greener sobre armazenamento de energia, reunindo especialistas, empresas e investidores."
+        en: "Launching Greener's strategic study on energy storage: an in-person launch event for the first edition in 2025 and, in 2026, the new edition's landing page and online launch webinar.",
+        pt: "Lançamento do estudo estratégico de armazenamento de energia da Greener: um evento presencial para a primeira edição, em 2025, e, em 2026, a landing page e o webinar de lançamento da nova edição."
       },
       body: {
         en: [
-          "The event debated the challenges and opportunities of energy storage in Brazil's energy transition and launched Greener's Energy Storage strategic study, as part of the company's positioning on innovation in the sector.",
-          "I was responsible for the art direction, multichannel promotion and marketing strategy, and the digital and print materials for the attendee experience, coordinating internal areas and external partners to keep the brand consistent."
+          "The 2025 launch event debated the challenges and opportunities of energy storage in Brazil's energy transition and launched Greener's first Energy Storage strategic study, as part of the company's positioning on innovation in the sector.",
+          "I was responsible for the art direction, multichannel promotion and marketing strategy, and the digital and print materials for the attendee experience, coordinating internal areas and external partners to keep the brand consistent. The edition sold 40 copies and its free sample was downloaded 1,500 times.",
+          "In November 2026 Greener released the new edition, published as Strategic Energy Storage Study 2027 with the market's 2026 data. I built and published its landing page on greener.com.br, with the study highlights, a free sample vs full edition comparison and the lead forms, alongside the online launch webinar on 5 November."
         ],
         pt: [
-          "O evento debateu desafios e oportunidades do armazenamento na transição energética brasileira e lançou o Estudo Estratégico de Armazenamento de Energia da Greener, como parte do posicionamento da empresa em inovação no setor.",
-          "Fui responsável pela direção de arte, pelas campanhas de divulgação multicanal e pela estratégia de marketing, além dos materiais digitais e impressos da experiência do participante, coordenando áreas internas e parceiros externos para garantir consistência de marca."
+          "O evento de lançamento de 2025 debateu desafios e oportunidades do armazenamento na transição energética brasileira e lançou o primeiro Estudo Estratégico de Armazenamento de Energia da Greener, como parte do posicionamento da empresa em inovação no setor.",
+          "Fui responsável pela direção de arte, pelas campanhas de divulgação multicanal e pela estratégia de marketing, além dos materiais digitais e impressos da experiência do participante, coordenando áreas internas e parceiros externos para garantir consistência de marca. A edição vendeu 40 exemplares e a versão amostra teve 1.500 downloads.",
+          "Em novembro de 2026 a Greener lançou a nova edição, publicada como Estudo Estratégico de Armazenamento 2027, com os dados de 2026 do mercado. Construí e publiquei a landing page no greener.com.br, com os destaques do estudo, a comparação entre amostra gratuita e versão completa e os formulários de lead, junto ao webinar de lançamento on-line, em 5 de novembro."
         ]
       },
       deliverables: {
-        en: ["Art direction", "Launch campaign", "Signage & screens", "Digital & print materials"],
-        pt: ["Direção de arte", "Campanha de lançamento", "Sinalização e telas", "Materiais digitais e impressos"]
+        en: ["Art direction", "Launch campaign", "Signage & screens", "Digital & print materials", "Landing page (2026)", "Lead forms", "Launch webinar (2026)"],
+        pt: ["Direção de arte", "Campanha de lançamento", "Sinalização e telas", "Materiais digitais e impressos", "Landing page (2026)", "Formulários de lead", "Webinar de lançamento (2026)"]
       },
-      loops: [VID("storage-launch")],
-      images: range("storage", 7)
+      sets: [
+        { title: { en: "New edition · 2026", pt: "Nova edição · 2026" },
+          note: { en: "The landing page I built for the new edition, and the online launch webinar.", pt: "A landing page que construí para a nova edição e o webinar de lançamento on-line." },
+          yt: "oQ2PjdCs2-M", ytTitle: { en: "Launch webinar · Energy Storage Study", pt: "Webinar de lançamento · Estudo de Armazenamento" },
+          images: [IMG("web/m-lp.jpg"), IMG("web/m-lp2.jpg"), IMG("web/m-lp-tall.jpg")] },
+        { title: { en: "Launch event · 2025", pt: "Evento de lançamento · 2025" },
+          note: { en: "Praça São Lourenço, São Paulo.", pt: "Praça São Lourenço, São Paulo." },
+          loops: [VID("storage-launch")], images: range("storage", 7) }
+      ],
+      images: []
     },
     {
       slug: "webinars",
