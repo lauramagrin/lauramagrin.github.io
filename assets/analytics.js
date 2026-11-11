@@ -1,7 +1,7 @@
 /* Google Analytics 4, loaded only after the visitor accepts (LGPD): nothing is sent before a "yes".
    The choice is kept in localStorage; "Cookies" in the footer reopens the banner. */
 (function () {
-  var ID = "";   /* GA4 measurement ID (G-XXXXXXX) */
+  var ID = "G-3GS3STKW83";   /* GA4 measurement ID, property "Portfólio · lauramagrin.github.io" */
   if (!ID || !/(^|\.)lauramagrin\.github\.io$/.test(location.hostname) && !window.GA_TEST) return;
   var KEY = "ga-consent", pt = /^\/pt(\/|$)/.test(location.pathname) || document.documentElement.lang === "pt";
   var get = function () { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
